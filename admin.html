@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard</title>
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg,#1f1c2c,#928dab);
+    color: white;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(0,0,0,0.4);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border: none;
+    border-radius: 8px;
+}
+
+button {
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🛠 Admin Dashboard</h2>
+
+<!-- ADD RIDDLE -->
+<div class="card">
+    <h3>➕ Add New Riddle (MCQ)</h3>
+
+    <input id="question" placeholder="Riddle question">
+    <input id="o1" placeholder="Option 1">
+    <input id="o2" placeholder="Option 2">
+    <input id="o3" placeholder="Option 3">
+    <input id="o4" placeholder="Option 4">
+    <input id="answer" placeholder="Correct option number (1-4)">
+
+    <button onclick="addRiddle()">Add Riddle</button>
+</div>
+
+<!-- ADMIN ACTIONS -->
+<div class="card">
+    <button onclick="go('scoreboard.html')">🏆 View Scoreboard</button>
+    <button onclick="go('suggestions.html')">💡 View Suggestions</button>
+    <button onclick="logout()">🚪 Logout</button>
+</div>
+
+<script>
+// 🔐 Protect admin page
+if (localStorage.getItem("currentUser") !== "admin") {
+    location.href = "index.html";
+}
+
+// 📦 Init riddles storage
+if (!localStorage.getItem("riddles")) {
+    localStorage.setItem("riddles", JSON.stringify([]));
+}
+
+function addRiddle() {
+    if (
+        !question.value || !o1.value || !o2.value ||
+        !o3.value || !o4.value || !answer.value
+    ) {
+        return alert("Fill all fields");
+    }
+
+    const riddles = JSON.parse(localStorage.getItem("riddles"));
+
+    riddles.push({
+        q: question.value,
+        options: [o1.value, o2.value, o3.value, o4.value],
+        ans: answer.value
+    });
+
+    localStorage.setItem("riddles", JSON.stringify(riddles));
+    alert("✅ Riddle added successfully");
+
+    question.value = o1.value = o2.value = o3.value = o4.value = answer.value = "";
+}
+
+function go(page) {
+    location.href = page;
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
