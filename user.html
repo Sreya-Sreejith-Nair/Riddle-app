@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Daily Riddle</title>
+<style>
+body { font-family:Arial; background:#111; color:white; padding:20px; }
+.card { background:#222; padding:20px; border-radius:15px; }
+button { padding:10px; margin:5px 0; width:100%; }
+</style>
+</head>
+
+<body>
+
+<h2>🧩 Daily Riddle</h2>
+
+<div class="card" id="quiz"></div>
+
+<button onclick="go('scoreboard.html')">🏆 Scoreboard</button>
+<button onclick="go('suggestions.html')">💡 Suggestions</button>
+
+<script>
+const user = localStorage.getItem("currentUser");
+if(!user) location.href="index.html";
+
+const riddles = JSON.parse(localStorage.getItem("riddles"));
+const today = new Date().getDate();
+const riddle = riddles[today % riddles.length];
+
+quiz.innerHTML = `
+<h3>${riddle.q}</h3>
+${riddle.options.map((o,i)=>
+    `<button onclick="answer(${i+1})">${o}</button>`
+).join("")}
+`;
+
+function answer(n){
+    if(n == riddle.ans){
+        let users = JSON.parse(localStorage.getItem("users"));
+        let u = users.find(x=>x.user===user);
+        u.score += 10;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Correct! +10 points 🎉");
+    } else {
+        alert("Wrong ❌");
+    }
+}
+
+function go(p){ location.href=p; }
+</script>
+
+</body>
+</html>
