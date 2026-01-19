@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Scoreboard</title>
+<style>
+body { font-family:Arial; background:#000; color:white; padding:20px; }
+li { padding:8px; background:#222; margin:5px; border-radius:8px; }
+</style>
+</head>
+
+<body>
+
+<h2>🏆 Scoreboard</h2>
+<ul id="list"></ul>
+
+<script>
+const users = JSON.parse(localStorage.getItem("users"));
+users.sort((a,b)=>b.score-a.score);
+
+list.innerHTML = users.map((u,i)=>
+    `<li>#${i+1} ${u.user} — ⭐ ${u.score}</li>`
+).join("");
+</script>
+
+</body>
+</html>
