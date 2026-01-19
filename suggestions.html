@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Suggestions</title>
+<style>
+body { font-family:Arial; background:#222; color:white; padding:20px; }
+textarea,button { width:100%; padding:10px; margin:8px 0; }
+</style>
+</head>
+
+<body>
+
+<h2>💡 Suggestions</h2>
+
+<textarea id="s" placeholder="Your idea..."></textarea>
+<button onclick="save()">Submit</button>
+
+<script>
+if(!localStorage.getItem("suggestions")){
+    localStorage.setItem("suggestions", JSON.stringify([]));
+}
+function save(){
+    const sug = JSON.parse(localStorage.getItem("suggestions"));
+    sug.push(s.value);
+    localStorage.setItem("suggestions", JSON.stringify(sug));
+    alert("Thanks for your idea 🙌");
+    s.value="";
+}
+</script>
+
+</body>
+</html>
