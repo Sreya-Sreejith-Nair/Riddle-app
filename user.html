@@ -3,9 +3,34 @@
 <head>
 <title>Daily Riddle</title>
 <style>
-body { font-family:Arial; background:#111; color:white; padding:20px; }
-.card { background:#222; padding:20px; border-radius:15px; }
-button { padding:10px; margin:5px 0; width:100%; }
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color: white;
+    padding: 20px;
+}
+.card {
+    background: rgba(255,255,255,0.15);
+    padding: 25px;
+    border-radius: 20px;
+    max-width: 600px;
+    margin: auto;
+}
+button {
+    width: 100%;
+    padding: 12px;
+    margin: 6px 0;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.correct { background: #2ecc71; }
+.wrong { background: #e74c3c; }
 </style>
 </head>
 
@@ -15,37 +40,83 @@ button { padding:10px; margin:5px 0; width:100%; }
 
 <div class="card" id="quiz"></div>
 
+<br>
 <button onclick="go('scoreboard.html')">🏆 Scoreboard</button>
 <button onclick="go('suggestions.html')">💡 Suggestions</button>
 
 <script>
 const user = localStorage.getItem("currentUser");
-if(!user) location.href="index.html";
+if (!user) location.href = "index.html";
 
-const riddles = JSON.parse(localStorage.getItem("riddles"));
-const today = new Date().getDate();
-const riddle = riddles[today % riddles.length];
+const riddles = JSON.parse(localStorage.getItem("riddles")) || [];
+if (riddles.length === 0) {
+    quiz.innerHTML = "No riddles available yet.";
+    throw "";
+}
 
+// 🗓️ DAILY KEY
+const today = new Date().toISOString().slice(0,10);
+const key = user + "|" + today;
+
+// 🧠 ANSWERED STORAGE
+if (!localStorage.getItem("answered")) {
+    localStorage.setItem("answered", JSON.stringify({}));
+}
+const answered = JSON.parse(localStorage.getItem("answered"));
+
+// 🎯 PICK DAILY RIDDLE
+const riddle = riddles[new Date().getDate() % riddles.length];
+
+// 🧩 RENDER QUIZ
 quiz.innerHTML = `
 <h3>${riddle.q}</h3>
 ${riddle.options.map((o,i)=>
-    `<button onclick="answer(${i+1})">${o}</button>`
+    `<button id="btn${i}" onclick="answer(${i+1})">${o}</button>`
 ).join("")}
 `;
 
-function answer(n){
-    if(n == riddle.ans){
-        let users = JSON.parse(localStorage.getItem("users"));
-        let u = users.find(x=>x.user===user);
-        u.score += 10;
-        localStorage.setItem("users", JSON.stringify(users));
-        alert("Correct! +10 points 🎉");
-    } else {
-        alert("Wrong ❌");
-    }
+// 🔒 IF ALREADY ANSWERED
+if (answered[key]) {
+    lockQuiz();
 }
 
-function go(p){ location.href=p; }
+// 🧠 ANSWER FUNCTION
+function answer(choice) {
+    if (answered[key]) return;
+
+    const correct = (choice == riddle.ans);
+    const buttons = document.querySelectorAll("button");
+
+    buttons.forEach((b,i)=>{
+        b.disabled = true;
+        if (i+1 == riddle.ans) b.classList.add("correct");
+        if (i+1 == choice && !correct) b.classList.add("wrong");
+    });
+
+    if (correct) {
+        let users = JSON.parse(localStorage.getItem("users"));
+        let u = users.find(x => x.user === user);
+        u.score += 10;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("✅ Correct! +10 points");
+    } else {
+        alert("❌ Wrong answer");
+    }
+
+    answered[key] = true;
+    localStorage.setItem("answered", JSON.stringify(answered));
+}
+
+// 🔐 LOCK UI
+function lockQuiz() {
+    const buttons = document.querySelectorAll("button");
+    buttons.forEach(b => b.disabled = true);
+    quiz.innerHTML += "<p>⏳ You already answered today’s riddle.</p>";
+}
+
+function go(p) {
+    location.href = p;
+}
 </script>
 
 </body>
