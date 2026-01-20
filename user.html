@@ -17,7 +17,6 @@ body {
     margin: auto;
 }
 button {
-    width: 100%;
     padding: 12px;
     margin: 6px 0;
     border: none;
@@ -25,12 +24,20 @@ button {
     cursor: pointer;
     font-size: 16px;
 }
-button:disabled {
+.option-btn {
+    width: 100%;
+}
+.option-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 .correct { background: #2ecc71; }
 .wrong { background: #e74c3c; }
+.nav-btn {
+    width: 100%;
+    background: #111;
+    color: white;
+}
 </style>
 </head>
 
@@ -41,8 +48,8 @@ button:disabled {
 <div class="card" id="quiz"></div>
 
 <br>
-<button onclick="go('scoreboard.html')">🏆 Scoreboard</button>
-<button onclick="go('suggestions.html')">💡 Suggestions</button>
+<button class="nav-btn" onclick="go('scoreboard.html')">🏆 Scoreboard</button>
+<button class="nav-btn" onclick="go('suggestions.html')">💡 Suggestions</button>
 
 <script>
 const user = localStorage.getItem("currentUser");
@@ -54,30 +61,31 @@ if (riddles.length === 0) {
     throw "";
 }
 
-// 🗓️ DAILY KEY
+// 📅 DAILY KEY
 const today = new Date().toISOString().slice(0,10);
 const key = user + "|" + today;
 
-// 🧠 ANSWERED STORAGE
+// 🧠 ANSWER TRACKER
 if (!localStorage.getItem("answered")) {
     localStorage.setItem("answered", JSON.stringify({}));
 }
 const answered = JSON.parse(localStorage.getItem("answered"));
 
-// 🎯 PICK DAILY RIDDLE
+// 🎯 PICK TODAY’S RIDDLE
 const riddle = riddles[new Date().getDate() % riddles.length];
 
 // 🧩 RENDER QUIZ
 quiz.innerHTML = `
 <h3>${riddle.q}</h3>
 ${riddle.options.map((o,i)=>
-    `<button id="btn${i}" onclick="answer(${i+1})">${o}</button>`
+    `<button class="option-btn" id="opt${i}" onclick="answer(${i+1})">${o}</button>`
 ).join("")}
 `;
 
 // 🔒 IF ALREADY ANSWERED
 if (answered[key]) {
-    lockQuiz();
+    lockOptions();
+    quiz.innerHTML += "<p>⏳ You already answered today’s riddle.</p>";
 }
 
 // 🧠 ANSWER FUNCTION
@@ -85,12 +93,12 @@ function answer(choice) {
     if (answered[key]) return;
 
     const correct = (choice == riddle.ans);
-    const buttons = document.querySelectorAll("button");
+    const options = document.querySelectorAll(".option-btn");
 
-    buttons.forEach((b,i)=>{
-        b.disabled = true;
-        if (i+1 == riddle.ans) b.classList.add("correct");
-        if (i+1 == choice && !correct) b.classList.add("wrong");
+    options.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i + 1 == riddle.ans) btn.classList.add("correct");
+        if (i + 1 == choice && !correct) btn.classList.add("wrong");
     });
 
     if (correct) {
@@ -107,15 +115,16 @@ function answer(choice) {
     localStorage.setItem("answered", JSON.stringify(answered));
 }
 
-// 🔐 LOCK UI
-function lockQuiz() {
-    const buttons = document.querySelectorAll("button");
-    buttons.forEach(b => b.disabled = true);
-    quiz.innerHTML += "<p>⏳ You already answered today’s riddle.</p>";
+// 🔐 LOCK ONLY OPTIONS
+function lockOptions() {
+    document.querySelectorAll(".option-btn").forEach(btn => {
+        btn.disabled = true;
+    });
 }
 
-function go(p) {
-    location.href = p;
+// 🔁 NAVIGATION
+function go(page) {
+    location.href = page;
 }
 </script>
 
